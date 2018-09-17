@@ -41,7 +41,7 @@ public class JmsConfig {
     private String password;
 
     @Bean
-    @DependsOn(value = { "mysqldatasource" })
+    @DependsOn(value = { "embedded-activemq" })
     public ActiveMQConnectionFactory connectionFactory() {
         LOG.info("Creating connectionFactory ...");
         if ("".equals(user)) {
@@ -51,7 +51,6 @@ public class JmsConfig {
     }
 
     @Bean
-    @DependsOn(value = { "mysqldatasource" })
     public JmsListenerContainerFactory jmsFactoryTopic(ConnectionFactory connectionFactory,
             DefaultJmsListenerContainerFactoryConfigurer configurer) {
         LOG.info("Creating jmsFactoryTopic ...");
@@ -62,28 +61,17 @@ public class JmsConfig {
     }
 
     @Bean
-    @DependsOn(value = { "mysqldatasource" })
     public JmsTemplate jmsTemplate() {
         LOG.info("Creating jmsTemplate ...");
         return new JmsTemplate(connectionFactory());
     }
 
     @Bean
-    @DependsOn(value = { "mysqldatasource" })
     public MessageConverter messageConverter() {
         LOG.info("Creating messageConverter ...");
         MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
         converter.setTargetType(MessageType.TEXT);
         converter.setTypeIdPropertyName("_type");
         return converter;
-    }
-
-    @Bean("mysqldatasource")
-    @ConfigurationProperties(prefix = "spring.datasource")        
-    public DataSource dataSource() {
-        LOG.info("Creating DATASOURCE ..............");
-        return DataSourceBuilder
-                .create()
-                .build();
     }
 }
