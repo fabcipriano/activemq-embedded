@@ -21,19 +21,6 @@
   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
   http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
 
-    <!-- Allows us to use system properties as variables in this configuration file 
-    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="locations">
-            <value>file:${activemq.conf}/credentials.properties</value>
-        </property>
-    </bean>
--->
-   <!-- Allows accessing the server log -->
-    <bean id="logQuery" class="io.fabric8.insight.log.log4j.Log4jLogQuery"
-          lazy-init="false" scope="singleton"
-          init-method="start" destroy-method="stop">
-    </bean>
-
     <!--
         The <broker> element is used to configure the ActiveMQ broker.
     -->
@@ -83,7 +70,7 @@
         -->
 
         <persistenceAdapter>
-            <jdbcPersistenceAdapter dataSource="#mysql-ds" />
+            <jdbcPersistenceAdapter dataSource="#mysqldatasource" />
         </persistenceAdapter> 
           <!--
             The systemUsage controls the maximum amount of space the broker will

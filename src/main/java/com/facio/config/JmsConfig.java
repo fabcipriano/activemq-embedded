@@ -1,11 +1,17 @@
 package com.facio.config;
 
 import javax.jms.ConnectionFactory;
+import javax.sql.DataSource;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerContainerFactory;
@@ -22,6 +28,7 @@ import org.springframework.jms.support.converter.MessageConverter;
 @EnableJms
 public class JmsConfig {
 
+    private static Logger LOG = LogManager.getLogger();
     public static final String ORDER_QUEUE = "order-queue";
 
     @Value("${spring.activemq.broker-url}")
@@ -34,7 +41,9 @@ public class JmsConfig {
     private String password;
 
     @Bean
+    @DependsOn(value = { "mysqldatasource" })
     public ActiveMQConnectionFactory connectionFactory() {
+        LOG.info("Creating connectionFactory ...");
         if ("".equals(user)) {
             return new ActiveMQConnectionFactory(brokerUrl);
         }
@@ -42,8 +51,10 @@ public class JmsConfig {
     }
 
     @Bean
+    @DependsOn(value = { "mysqldatasource" })
     public JmsListenerContainerFactory jmsFactoryTopic(ConnectionFactory connectionFactory,
             DefaultJmsListenerContainerFactoryConfigurer configurer) {
+        LOG.info("Creating jmsFactoryTopic ...");
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         configurer.configure(factory, connectionFactory);
         factory.setPubSubDomain(true);
@@ -51,29 +62,28 @@ public class JmsConfig {
     }
 
     @Bean
+    @DependsOn(value = { "mysqldatasource" })
     public JmsTemplate jmsTemplate() {
+        LOG.info("Creating jmsTemplate ...");
         return new JmsTemplate(connectionFactory());
     }
 
     @Bean
-    public JmsTemplate jmsTemplateTopic() {
-        JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory());
-        jmsTemplate.setPubSubDomain(true);
-        return jmsTemplate;
-    }
-
-    @Bean
-    public JmsListenerContainerFactory<?> queueListenerFactory() {
-        DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-        factory.setMessageConverter(messageConverter());
-        return factory;
-    }
-
-    @Bean
+    @DependsOn(value = { "mysqldatasource" })
     public MessageConverter messageConverter() {
+        LOG.info("Creating messageConverter ...");
         MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
         converter.setTargetType(MessageType.TEXT);
         converter.setTypeIdPropertyName("_type");
         return converter;
+    }
+
+    @Bean("mysqldatasource")
+    @ConfigurationProperties(prefix = "spring.datasource")        
+    public DataSource dataSource() {
+        LOG.info("Creating DATASOURCE ..............");
+        return DataSourceBuilder
+                .create()
+                .build();
     }
 }
