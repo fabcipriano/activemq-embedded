@@ -1,12 +1,13 @@
 package com.facio.messaging;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  *
  * @author fabiano
  */
-public class Order {
+public class Order implements Serializable {
 private String content;
     private Date timestamp;
 

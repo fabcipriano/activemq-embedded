@@ -51,19 +51,19 @@ public class JmsConfig {
     }
 
     @Bean
-    public JmsListenerContainerFactory jmsFactoryTopic(ConnectionFactory connectionFactory,
-            DefaultJmsListenerContainerFactoryConfigurer configurer) {
-        LOG.info("Creating jmsFactoryTopic ...");
-        DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-        configurer.configure(factory, connectionFactory);
-        factory.setPubSubDomain(true);
-        return factory;
+    public JmsTemplate jmsTemplate() {
+        LOG.info("Creating jmsTemplate ...");
+        JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory());
+        jmsTemplate.setMessageConverter(messageConverter());
+        return jmsTemplate;
     }
 
     @Bean
-    public JmsTemplate jmsTemplate() {
-        LOG.info("Creating jmsTemplate ...");
-        return new JmsTemplate(connectionFactory());
+    public DefaultJmsListenerContainerFactory queueListenerFactory( DefaultJmsListenerContainerFactoryConfigurer configurer ) {
+        DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+        configurer.configure(factory, connectionFactory());
+        factory.setMessageConverter(messageConverter());
+        return factory;
     }
 
     @Bean

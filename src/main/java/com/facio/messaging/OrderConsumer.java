@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 public class OrderConsumer {
     private static Logger log = LogManager.getLogger();
 
-    @JmsListener(destination = ORDER_QUEUE)
+    @JmsListener(destination = ORDER_QUEUE, containerFactory = "queueListenerFactory")
     public void receiveMessage(@Payload Order order,
                                @Headers MessageHeaders headers,
                                Message message, Session session) {
