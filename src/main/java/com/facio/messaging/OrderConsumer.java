@@ -2,6 +2,8 @@
 package com.facio.messaging;
 
 import static com.facio.config.JmsConfig.ORDER_QUEUE;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import javax.jms.Message;
 import javax.jms.Session;
 import org.apache.logging.log4j.LogManager;
@@ -24,15 +26,15 @@ public class OrderConsumer {
     public void receiveMessage(@Payload Order order,
                                @Headers MessageHeaders headers,
                                Message message, Session session) {
-        log.info("received <" + order + ">");
-
-        log.info("- - - - - - - - - - - - - - - - - - - - - - - -");
-        log.info("######          Message Details           #####");
-        log.info("- - - - - - - - - - - - - - - - - - - - - - - -");
-        log.info("headers: " + headers);
-        log.info("message: " + message);
-        log.info("session: " + session);
-        log.info("- - - - - - - - - - - - - - - - - - - - - - - -");
+        waitFor();        
+        log.info("after wait, JMS Received <" + order + ">; message.:" + message);
     }
 
+    private void waitFor() throws RuntimeException {
+        try {
+            TimeUnit.SECONDS.sleep(5);
+        } catch (InterruptedException ex) {
+            throw new RuntimeException("unexpected exception", ex);
+        }
+    }
 }

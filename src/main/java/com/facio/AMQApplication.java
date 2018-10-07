@@ -25,14 +25,14 @@ public class AMQApplication implements ApplicationRunner {
         LOG.info("Start sending messages ...");
         LOG.info("Spring Boot Embedded ActiveMQ Configuration Example");
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 3000; i++) {
             Order myMessage = new Order(i + " - Sending JMS Message using Embedded activeMQ", new Date());
             orderSender.send(myMessage);
-            TimeUnit.SECONDS.sleep(10);
+            TimeUnit.MILLISECONDS.sleep(100);
         }
 
         LOG.info("Waiting for all ActiveMQ JMS Messages to be consumed");
-        TimeUnit.SECONDS.sleep(10);
+        TimeUnit.SECONDS.sleep(3600);
     }
 
     public static void main(String[] args) {

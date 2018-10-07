@@ -1,21 +1,18 @@
 package com.facio.config;
 
-import javax.jms.ConnectionFactory;
-import javax.sql.DataSource;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
-import org.springframework.jms.config.JmsListenerContainerFactory;
+import org.springframework.jms.connection.CachingConnectionFactory;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.support.converter.MessageType;
 import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
 import org.springframework.jms.support.converter.MessageConverter;
@@ -50,10 +47,18 @@ public class JmsConfig {
         return new ActiveMQConnectionFactory(user, password, brokerUrl);
     }
 
+    public CachingConnectionFactory cachingConnectionFactoryForProducer() {
+        CachingConnectionFactory cache = new CachingConnectionFactory(connectionFactory());
+        cache.setCacheConsumers(false);
+        cache.setCacheProducers(true);
+        cache.setSessionCacheSize(4);
+        return cache;
+    }
+    
     @Bean
     public JmsTemplate jmsTemplate() {
         LOG.info("Creating jmsTemplate ...");
-        JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory());
+        JmsTemplate jmsTemplate = new JmsTemplate(cachingConnectionFactoryForProducer());
         jmsTemplate.setMessageConverter(messageConverter());
         return jmsTemplate;
     }
@@ -63,6 +68,10 @@ public class JmsConfig {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         configurer.configure(factory, connectionFactory());
         factory.setMessageConverter(messageConverter());
+        factory.setSessionTransacted(true);
+        factory.setConcurrency("5-20");
+        factory.setCacheLevel(DefaultMessageListenerContainer.CACHE_CONSUMER);
+        
         return factory;
     }
 
