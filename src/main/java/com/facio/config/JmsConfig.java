@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFac
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.connection.CachingConnectionFactory;
@@ -71,6 +72,7 @@ public class JmsConfig {
         factory.setSessionTransacted(true);
         factory.setConcurrency("5-20");
         factory.setCacheLevel(DefaultMessageListenerContainer.CACHE_CONSUMER);
+        factory.setTaskExecutor(new SimpleAsyncTaskExecutor("QueueConsumer-"));
         
         return factory;
     }
