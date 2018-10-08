@@ -3,7 +3,6 @@ package com.facio.messaging;
 
 import static com.facio.config.JmsConfig.ORDER_QUEUE;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import javax.jms.Message;
 import javax.jms.Session;
 import org.apache.logging.log4j.LogManager;
@@ -20,14 +19,14 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class OrderConsumer {
-    private static Logger log = LogManager.getLogger();
+    private static Logger LOG = LogManager.getLogger();
 
     @JmsListener(destination = ORDER_QUEUE, containerFactory = "queueListenerFactory")
     public void receiveMessage(@Payload Order order,
                                @Headers MessageHeaders headers,
                                Message message, Session session) {
-        waitFor();        
-        log.info("after wait, JMS Received <" + order + ">; message.:" + message);
+        waitFor();
+        LOG.info("after wait, JMS Received <" + order + ">; message.:" + message);
     }
 
     private void waitFor() throws RuntimeException {
